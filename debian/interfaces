@@ -1,0 +1,10 @@
+auto freifunk
+iface freifunk inet6 static
+  address <internal ipv6 address>
+  netmask 64
+  bridge_ports bat0
+iface freifunk inet static
+        address <internal ipv4 address>
+        netmask 255.255.0.0
+	# TODO add entry to routing table "vpn"
+
