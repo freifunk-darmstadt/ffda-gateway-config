@@ -28,7 +28,7 @@ add_routes() {
         ip route flush table vpn
 	# bad idea to add the routes for devices not related to openvpn, should be in up-script for dev
 	# otherwise, a restart of freifunk dev will result in loss of this entry
-        ip route add "$FF_NET" dev freifunk src "$FF_IP" src "$FF_IP" table vpn
+        ip route add "$FF_NET" dev "FF_DEV" src "$FF_IP" src "$FF_IP" table vpn
         ip route add "$route_vpn_gateway" dev "$dev" src "$ifconfig_local" table vpn
         ip route add default via "$route_vpn_gateway" src "$ifconfig_local" table vpn
 
