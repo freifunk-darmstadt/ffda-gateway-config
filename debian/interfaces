@@ -4,7 +4,7 @@ iface freifunk inet6 static
   netmask 64
   bridge_ports bat0
 iface freifunk inet static
-        address <internal ipv4 address>
-        netmask 255.255.0.0
-	# TODO add entry to routing table "vpn"
-
+  address <internal ipv4 address>
+  netmask 255.255.0.0
+  post-up ip route add 10.223.0.0/16 dev freifunk src <internal v4 address> table vpn
+  pre-down ip route del 10.223.0.0/16 dev freifunk src <internal v4 address> table vpn
