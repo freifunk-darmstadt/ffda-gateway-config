@@ -1,49 +1,41 @@
-#!/bin/sh
+#!/bin/sh  
+  
+set -x  
+  
+ENVFILE="/tmp/ovpn-env-up"  
+echo "$@"  > "$ENVFILE"  
+env >> "$ENVFILE"  
 
-set -x
-
-# for debugging purposes
-# prints our call and env to $ENVFILE
-ENVFILE="/tmp/ovpn-env-up"
-echo "$@"  > "$ENVFILE"
-env >> "$ENVFILE"
-
-LOCAL_IP="<public ip of gateway machine>"
-FF_DEV="freifunk"
-FF_NET="10.223.0.0/16"
-FF_IP="<internal ip of gateway machine>"
-
-
-manage_rules() {
-        ACTION="$1"
-        ip rule $ACTION priority 10 iif "$FF_DEV" table vpn
-        ip rule $ACTION priority 10 iif "$dev" table vpn
-        ip rule $ACTION priority 10 from "$ifconfig_local" table vpn
-}
-
-add_routes() {
-        ip route flush table vpn_gw
-        ip route add "$trusted_ip" via "$route_net_gateway" src "$LOCAL_IP" table vpn_gw
-
-        ip route flush table vpn
-        ip route add "$route_vpn_gateway" dev "$dev" src "$ifconfig_local" table vpn
-        ip route add default via "$route_vpn_gateway" src "$ifconfig_local" table vpn
-}
-
-flush_routes() {
-        ip route flush table vpn
-        ip route flush table vpn_gw
-}
-
-
-if [ "$script_type" = "up" ]; then
-        manage_rules del || true
-        manage_rules add
-        add_routes
-elif [ "$script_type" = "down" ]; then
-        manage_rules del
-        flush_routes
-fi
-
-ip route flush cache
-
+# TODO determine automatically
+LOCAL_IP="<local public ip address>"  
+FF_DEV="freifunk"  
+  
+  
+manage_rules() {  
+        ACTION="$1"  
+        # TODO static rules  
+        # TODO more rules so openvpn can has its own routing table which can be flushed  
+        ip rule $ACTION priority 9 from all table vpn_gw  
+        ip rule $ACTION priority 10 iif "$FF_DEV" table vpn  
+        ip rule $ACTION priority 10 iif "$dev" table vpn  
+}  
+  
+manage_routes() {  
+        ip route $ACTION "$trusted_ip" via "$route_net_gateway" src "$LOCAL_IP" table vpn_gw  
+  
+        ip route $ACTION "$route_vpn_gateway" dev "$dev" src "$ifconfig_local" table vpn  
+        ip route $ACTION default via "$route_vpn_gateway" src "$ifconfig_local" table vpn  
+  
+}  
+  
+  
+if [ "$script_type" = "up" ]; then  
+        manage_rules del || true  
+        manage_rules add  
+        manage_routes add  
+elif [ "$script_type" = "down" ]; then  
+        manage_rules del  
+        manage_routes del  
+fi  
+  
+ip route flush cache 
