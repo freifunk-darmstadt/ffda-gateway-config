@@ -25,7 +25,6 @@ manage_routes() {
   
         ip route $ACTION "$route_vpn_gateway" dev "$dev" src "$ifconfig_local" table vpn  
         ip route $ACTION default via "$route_vpn_gateway" src "$ifconfig_local" table vpn  
-  
 }  
   
   
